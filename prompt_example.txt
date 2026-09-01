@@ -1,0 +1,49 @@
+You are a legal assistant. Extract the following information from the text of a court case:
+
+- Offense: The full legal violation or crime charged. What is the primary offense or legal/procedural concept at issue? Examples of offenses: "Larceny," "Burglary," "Abduction," "Assault." Examples of legal concepts: "Contempt of court," "Habeas corpus petition," "Procedural appeal on evidence," "Insanity defense."
+- Punishment: The sentence or penalty imposed. If it is an appeal overturning the sentence, or it is not a criminal case (e.g., "Contempt of court" overturned), or it is not mentioned, enter "None stated." DO NOT invent a punishment unless it is explicitly stated.
+- Decision: The final ruling by the court (e.g., Affirmed, Reversed, Remanded, Overruled).
+
+Output your result as JSON with keys: offense", "punishment", "decision".
+
+Examples:
+
+Case 1:
+Id:4723856
+Head Matter: "Ex Parte Bob Goodman. Ho. 3956. Decided February 9, 1916. Habeas Corpus — Extradition—Affidavit—Fugitive from Justice. In the absence of any extradition papers issued by the Governor of this State honoring a requisition from the Governor of the demanding State, and a showing that the appellant was charged in the demanding State by indictment or complaint with this offense, an affidavit made in this State that the affiant had reason to believe that the applicant is a fugitive from justice from a sister State and guilty of rape, is not sufficient as a basis for extradition. From Hill County. Original habeas corpus proceedings asking discharge from custody based on affidavit made in this State to have relator extradited. The opinion states the case. Ho brief on file for appellant. C. C. McDonald, Assistant Attorney General, for the State."
+Opinions: "DAVIDSON, Judge. This record is very brief, and can be briefly stated. It is an original application for a writ of habeas corpus to this court asking for a discharge under what is supposed to be an extradition proceeding. As a basis for this case Mr. Gross made an affidavit that he had good reason to believe and did believe that Bob Goodman is a fugitive from justice, from the State of Louisiana; that he did on or about the 15th of May, 1915, in said State of Louisiana, wilfully, maliciously and feloniously have carnal knowledge with Leona Daily, she being an unmarried female between the age of twelve and eighteen years, and that said act so committed by Bob Goodman was then and there and is now a violation of the penal laws of the State of Louisiana, and that said Goodman has fled from that State where he committed said offense to the State of Texas, and is now to be found in Hill County, Texas. It will be noticed that this affidavit only states that the affiant had reason to believe that the applicant is a fugitive from justice from a sister State... The applicant is entitled to his discharge, which is accordingly ordered. Relator discharged."
+Output:
+{{
+  "offense": "Habeas Corpus / Extradition — affidavit concerning a fugitive from justice accused of rape",
+  "punishment": "None",
+  "decision": "Relator discharged"
+}}
+
+Case 2:
+Id:4723669
+Head Matter: "Loss Leonard v. The State. No. 4000. Decided March 22, 1916. Theft of a Hog — Insufficiency of the Evidence — Newly Discovered Evidence. Where, upon trial of theft of a hog, the record on appeal showed that the evidence for the State was weak on the question of ownership, and that the court overruled a motion for new trial setting out newly discovered evidence which is material, the judgment must be reversed and the cause remanded. Appeal from the District Court of Angelina. Tried below before the Hon. L. D. Guinn. Appeal from a conviction of theft of a hog; penalty, two years imprisonment in the penitentiary. The opinion states the case. I. D. Fairchild and W. J. Townsend, Jr., for appellant. On question of insufficiency of the evidence..."
+Opinions: "HARPER, Judge. Appellant was convicted of theft of a hog and his punishment assessed at two years confinement in the State penitentiary. The State’s case, as testified to by its witnesses, is that J. E. Lee owned some hogs that run at large in the Neches River bottom... The judgment is reversed and the cause remanded. Reversed and remanded. DAVIDSON, Judge, absent."
+Output:
+{{
+  "offense": "Theft of a hog",
+  "punishment": "Two years imprisonment in the State penitentiary",
+  "decision": "Reversed and remanded"
+}}
+
+Case 3:
+Id:5255601
+Head Matter: "Ex Parte Mont Bridges. No. 17234. Delivered October 17, 1934. Rehearing Denied October 31, 1934. Reported in 75 S. W. (2d) 270. The opinion states the case. T. L. Price, of Post and Bledsoe, Crenshaw & Dupree, of Lubbock, for appellant. Lloyd W. Davidson, State’s Attorney, of Austin, for the State."
+Opinions: "MORROW, Presiding Judge. This is an appeal from the order of the district judge denying bail for the murder of J. Donaldson. Before indictment relator was granted bail by an order of the court. However, before bond was made an indictment was returned against him. By agreement the evidence given on the first as well as on the present hearing is before the court. By separate indictment relator was charged with the murder of Bertha Gordon and Jay Donaldson. The evidence in the two cases is identical. According to the testimony of Mrs. Susie Gordon, mother of the deceased, Bertha Gordon, during the month of March or April, 1934, the relator came to her residence and while there made threats against Jay Donaldson... Our study of the evidence leads us to conclude that we are not justified in overturning the judgment of the learned trial judge who sat in the hearing and formed the conclusion that his duty required that he refuse to authorize the release of the relator on bail. The relator is therefore denied bail. Affirmed."
+
+Output:
+
+{{
+  "offense": "Murder of J. Donaldson and Bertha Gordon",
+  "punishment": "Denied bail (pre-trial)",
+  "decision": "Affirmed"
+}}
+
+Now extract the offense, punishment, and decision from this case:
+Id: "{id}"
+Head Matter: "{head_matter}"
+Opinions: "{opinions}"

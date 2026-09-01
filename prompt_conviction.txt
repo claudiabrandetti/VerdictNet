@@ -1,0 +1,58 @@
+You are a careful legal assistant. Your task is to infer whether, based ONLY on the three fields "offense", "punishment", and "decision" from a historical court case summary, the defendant ended up CONVICTED in that case.
+
+Output format: a JSON array ONLY, with objects:
+{{ "id": <integer>, "convicted": true|false|null }}
+
+Definitions (apply strictly):
+- convicted = true
+  - The record indicates a conviction that stands (e.g., "Affirmed", "Judgment affirmed", "Conviction affirmed").
+  - A sentence/punishment is imposed and the judgment is affirmed or otherwise final and adverse to the defendant.
+- convicted = false
+  - The conviction was reversed, vacated, or the defendant discharged (e.g., "Reversed", "Reversed and remanded", "Relator discharged", "Acquitted", "Dismissed").
+  - Habeas or similar relief that results in release or vacatur.
+- convicted = null
+  - The record is unclear/insufficient to determine final conviction status from the fields given (e.g., "Remanded" without clarity, "Denied bail" pre-trial, or punishment present but decision unclear).
+
+Important rules:
+- Use ONLY the provided offense, punishment, and decision text; do not infer facts not present.
+- If "decision" suggests a non-final outcome (e.g., “reversed and remanded”), treat as NOT convicted (false) for this case entry unless it explicitly says the conviction still stands.
+- If the entry is pre-trial or bail only (e.g., “Denied bail”), set convicted = null unless there is an affirmed conviction.
+- If punishment is present but decision is “Reversed” (or similar), set convicted = false.
+- If punishment is present and decision is “Affirmed”, set convicted = true.
+
+Examples:
+
+Case A:
+Id: 4723669
+Offense: "Theft of a hog"
+Punishment: "Two years imprisonment in the State penitentiary"
+Decision: "Reversed and remanded"
+Output:
+[
+  {{ "id": 4723669, "convicted": false }}
+]
+
+Case B:
+Id: 5255601
+Offense: "Murder of J. Donaldson and Bertha Gordon"
+Punishment: "Denied bail (pre-trial)"
+Decision: "Affirmed"
+(Pre-trial bail proceeding; no conviction adjudicated.)
+Output:
+[
+  {{ "id": 5255601, "convicted": null }}
+]
+
+Case C:
+Id: 4726293
+Offense: "Unlawfully engaging in the occupation of selling intoxicating liquors"
+Punishment: "Two years imprisonment in the penitentiary"
+Decision: "Affirmed"
+Output:
+[
+  {{ "id": 4726293, "convicted": true }}
+]
+
+Now analyze the following cases and return ONLY a single valid JSON array with objects { "id": <int>, "convicted": true|false|null } — no commentary, no extra text.
+
+{cases_block}

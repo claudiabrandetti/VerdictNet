@@ -16,9 +16,9 @@ https://aifrontiersgroup6.my.canva.site/llm
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![Neo4j](https://img.shields.io/badge/Neo4j-Graph%20Database-orange)
-![Gemini Extraction](https://img.shields.io/badge/Extraction-Gemini%202.5-4285F4)
-![Gemini RAG](https://img.shields.io/badge/RAG-Gemini%202.0%20Flash-8E75B2)
-![Streamlit](https://img.shields.io/badge/Frontend-Streamlit-red)
+![Gemini Extraction](https://img.shields.io/badge/Extraction-Gemini%203.7-4285F4)
+![Gemini RAG](https://img.shields.io/badge/RAG-Gemini%203.7%20Flash-8E75B2)
+![Vercel](https://img.shields.io/badge/Frontend-Vercel%20%26%20Vis.js-black?logo=vercel)
 
 An intelligent legal assistant that combines semantic search with legal citation network analysis.
 
@@ -35,20 +35,21 @@ By transforming **7791 raw legal documents** (Texas Criminal Reports) into a Kno
 * **Hybrid Retrieval Engine:** Combines **Vector Search** (to find similar facts using `text-embedding-004`) with **Graph Traversal** (to find authoritative precedents cited by those cases).
 * **Citation Network Analysis:** Traverses the graph (Depth 1-2) to uncover the "legal pillars" behind a case, identifying winning strategies (e.g., *Reversed* judgements).
 * **Strategic Filtering:** Allows users to filter results based on the desired outcome (e.g., *Defense/Acquittal* vs. *Prosecution/Conviction*).
-* **LLM-Driven Extraction (Gemini 2.5):** Utilizes the advanced reasoning of **Google Gemini 2.5** to extract structured metadata (Offense, Punishment, Decision, Conviction) from unstructured 19th-20th century texts with high precision.
-* **Interactive Visualization:** Features a dynamic graph visualization to explore the connections between the user's case and historical precedents.
+* **LLM-Driven Extraction (Gemini 3.7):** Utilizes the advanced reasoning of **Google Gemini 3.7** to extract structured metadata (Offense, Punishment, Decision, Conviction) from unstructured 19th-20th century texts with high precision.
+* **Interactive Visualization:** Features a dynamic graph visualization powered by **Vis.js** to explore connections between the user's case and historical precedents.
+* **Modern Web Deployment:** Production-ready full-stack architecture built for **Vercel** with a FastAPI serverless backend and luxury editorial UI.
 
 ----
 
 ## Architecture
 
-The system operates in two main phases: **The Builder** (Batch Processing with Gemini 2.5) and **The Assistant** (Inference with Gemini 2.0).
+The system operates in two main phases: **The Builder** (Batch Processing with Gemini 3.7) and **The Assistant** (Inference with Gemini 3.7 Flash).
 
 ```mermaid
 graph TD
     subgraph Data_Pipeline
         A[Raw JSON Data] -->|Parser| B(Data Cleaning)
-        B -->|High-Fidelity Extraction| C{Gemini 2.5}
+        B -->|High-Fidelity Extraction| C{Gemini 3.7}
         C -->|Metadata| D[Neo4j Graph]
         C -->|Text| E[Vector Embeddings]
         E -->|text-embedding-004| D
@@ -57,39 +58,52 @@ graph TD
         User[User Query] -->|text-embedding-004| Search[Hybrid Search]
         Search -->|Vector Sim| Anchor[Anchor Cases]
         Anchor -->|Graph Traversal| Prec[Precedents]
-        Prec -->|Context Injection| Gen[Gemini 2.0 Flash]
+        Prec -->|Context Injection| Gen[Gemini 3.7 Flash]
         Gen --> Output[Strategic Memo]
     end
-````
+```
+
 ### LLM Engineering
 We implemented a multi-model architecture to leverage the best strengths of each LLM version:
 
-* **High-Fidelity Extraction (Gemini 2.5):** We used **Gemini 2.5** for Zero-Shot extraction of structured data from 19th-century legal texts. Its superior reasoning capabilities ensured accurate parsing of complex schema fields like `Offense`, `Punishment`, and `Decision`.
-* **Grounded Generation (Gemini 2.0 Flash):** For the RAG phase, we utilized **Gemini 2.0 Flash** due to its speed and long-context window. By grounding the generation strictly in the retrieved graph context, we minimized legal hallucinations.
+* **High-Fidelity Extraction (Gemini 3.7):** We use **Gemini 3.7** for Zero-Shot extraction of structured data from 19th-century legal texts. Its superior reasoning capabilities ensure accurate parsing of complex schema fields like `Offense`, `Punishment`, and `Decision`.
+* **Grounded Generation (Gemini 3.7 Flash):** For the RAG inference phase, we utilize **Gemini 3.7 Flash** due to its speed, long-context window, and high-fidelity reasoning. By grounding the generation strictly in the retrieved graph context, we minimize legal hallucinations.
+
 -----
 
-##  Tech Stack
+## Tech Stack
 
 * **Language:** Python 3.10+
 * **Database:** Neo4j (Graph DB + Vector Index)
 * **AI Models:**
-      * **Extraction:** Google Gemini 2.5
-      * **RAG Engine:** Google Gemini 2.0 Flash
+      * **Extraction & Inference:** Google Gemini 3.7 Flash
       * **Embeddings:** `text-embedding-004`
-* **Frontend:** Streamlit & Streamlit-Agraph
+* **Backend:** FastAPI (Serverless API)
+* **Frontend:** Modern Responsive Web UI (Vis.js Network Visualization)
+* **Deployment:** Vercel (`vercel.json` + Python Serverless Runtime)
 * **Data Source:** [Case.law](https://case.law) (Harvard Caselaw Access Project)
 
 -----
 
-##  Project Structure
+## Project Structure
 
 ```bash
+├── api/
+│   └── index.py                     # FastAPI Serverless Backend (Endpoints: /api/analyze, /api/health, /api/examples)
+├── public/                          # Modern Frontend (Vercel Static / Luxury Editorial UI)
+│   ├── index.html                   # Main User Interface
+│   ├── style.css                    # Luxury Legal Editorial Styling
+│   └── app.js                       # Vis.js Citation Network & API Controller
 ├── data_pipeline/
-│   ├── case_law_crawler_tx.py       # Downloads raw cases
-│   ├── json_to_csv_parser_tx.py     # Converts JSON to CSV
-│   ├── llm_extraction_tx.py         # Extracts metadata via Gemini 2.5
-│   └── create_embeddings_final.py   # Generates Vectors (text-embedding-004)
-├── app.py                           # Main App (RAG Engine with Gemini 2.0 Flash)
+│   ├── A-case-law-crawler.ipynb     # Downloads raw cases
+│   ├── B-extract_tables_from_json.ipynb # Converts JSON to tabular data
+│   ├── C-LLM_extraction_caselaw.ipynb   # Extracts metadata via Gemini 3.7
+│   ├── D-data_merger.ipynb          # Merges data
+│   └── E-create_embedding.ipynb     # Generates Vectors (text-embedding-004)
+├── dev_server.py                    # Local Development Server (http://localhost:8000)
+├── app.py                           # Streamlit Legacy Reference App
+├── benchmark.py                     # Graph RAG vs Vector Search Evaluation
+├── vercel.json                      # Vercel Deployment Configuration
 ├── requirements.txt                 # Dependencies
 └── README.md                        # Documentation
 ```
@@ -109,7 +123,7 @@ We implemented a multi-model architecture to leverage the best strengths of each
 Clone the repository:
 
 ```bash
-git clone [https://github.com/denise-df/Gavel-Graph.git](https://github.com/denise-df/Gavel-Graph.git)
+git clone https://github.com/denise-df/Gavel-Graph.git
 cd Gavel-Graph
 ```
 
@@ -119,27 +133,44 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-### 3\. Configuration
+### 3. Configuration
 
-Create a `key.txt` file (or set environment variables) for your API keys:
+Set environment variables or create credential files in the root folder:
 
-```text
-# Inside key.txt
-YOUR_GEMINI_API_KEY
+**Option A (Environment Variables / `.env`):**
+```env
+GEMINI_API_KEY=your_gemini_api_key
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=your_neo4j_password
 ```
 
-Create a `neo4j_pass.txt` for your database password.
+**Option B (Local Key Files):**
+- Create `key.txt` containing your Gemini API key.
+- Create `neo4j_pass.txt` containing your Neo4j password.
 
-### 4\. Running the App
+### 4. Running Locally
 
-Once the database is populated (see `data_pipeline` scripts), launch the interface:
+Launch the local development server:
 
 ```bash
-streamlit run app.py
+python dev_server.py
 ```
-![Immagine WhatsApp 2025-11-30 ore 13 25 56_4684df20](https://github.com/user-attachments/assets/70cf8971-3a13-4e2e-ba61-6703fda7e7ea)
-![Immagine WhatsApp 2025-11-30 ore 13 29 35_995768eb](https://github.com/user-attachments/assets/65264338-fc82-46f1-a209-40fd8010808f)
 
+Open your browser at `http://localhost:8000` to access the interface. Interactive API documentation is available at `http://localhost:8000/docs`.
+
+### 5. Deploying to Vercel
+
+1. Push your repository to GitHub.
+2. Import the repository into your [Vercel Dashboard](https://vercel.com).
+3. In Project Settings $\rightarrow$ **Environment Variables**, add:
+   - `GEMINI_API_KEY`: Your Google Gemini API Key
+   - `NEO4J_URI`: Your Neo4j AuraDB URI (e.g. `neo4j+s://xxxx.databases.neo4j.io`)
+   - `NEO4J_USER`: `neo4j`
+   - `NEO4J_PASSWORD`: Your Neo4j AuraDB password
+4. Click **Deploy**. Vercel will automatically configure the FastAPI serverless functions and serve the modern static frontend.
+
+-----
 
 ## Case Study: The "Hybrid" Advantage
 

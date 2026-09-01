@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerdictNet — Stare Decisis AI (Texas Legal Graph)</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>⚖️</text></svg>">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Lato:ital,wght@0,300;0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+    
+    <!-- Vis.js Network for Graph Visualization -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    
+    <!-- Marked for Markdown Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Banner -->
+    <header class="luxury-header">
+        <div class="header-container">
+            <div class="logo-group">
+                <span class="gavel-icon">⚖️</span>
+                <div>
+                    <h1 class="brand-title">Texas Legal Graph</h1>
+                    <p class="brand-subtitle">Clarity Through Citation Networks &bull; Stare Decisis Graph RAG</p>
+                </div>
+            </div>
+            
+            <div class="system-status-bar">
+                <div class="status-pill" id="db-status-pill">
+                    <span class="status-dot online"></span>
+                    <span id="db-status-text">Neo4j Database</span>
+                </div>
+                <div class="status-pill">
+                    <span class="model-badge">Gemini 3.7 Flash</span>
+                </div>
+                <div class="status-pill">
+                    <span class="embed-badge">text-embedding-004</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        
+        <!-- Left / Top Workspace: Configuration & Case Facts -->
+        <section class="workspace-card">
+            <div class="card-header-bar">
+                <div class="header-left">
+                    <span class="section-tag">CASE INPUT</span>
+                    <h2 class="section-title">Case Details & Strategy</h2>
+                </div>
+                <div class="strategy-selector">
+                    <label class="strategy-label">Strategic Perspective:</label>
+                    <div class="strategy-buttons">
+                        <button type="button" class="strategy-btn active" data-strategy="defense" id="btn-strat-defense">
+                            <span class="strat-icon">🛡️</span> Defense Counsel
+                        </button>
+                        <button type="button" class="strategy-btn" data-strategy="prosecution" id="btn-strat-prosecution">
+                            <span class="strat-icon">⚔️</span> Prosecuting Attorney
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Example Chips -->
+            <div class="examples-container">
+                <span class="examples-title">Quick Study Cases:</span>
+                <div class="chips-group" id="examples-chips">
+                    <button class="chip-btn" data-example="burglary_intent">Burglary (No Intent / Asleep)</button>
+                    <button class="chip-btn" data-example="hog_theft">Theft of Livestock (Ownership)</button>
+                    <button class="chip-btn" data-example="extradition_habeas">Extradition (Defective Affidavit)</button>
+                    <button class="chip-btn" data-example="assault_murder">Assault with Intent to Murder</button>
+                </div>
+            </div>
+
+            <!-- Facts Input Area -->
+            <div class="input-container">
+                <textarea id="case-facts-input" class="facts-textarea" rows="4" placeholder="Describe the factual circumstances, criminal allegations, or procedural issue of the case... (e.g. 'Can a conviction for burglary be sustained if the defendant entered the house but fell asleep without taking anything?')"></textarea>
+                <div class="textarea-footer">
+                    <span class="char-count" id="char-count">0 characters</span>
+                    <span class="hint-text">Powered by Gemini 3.7 Flash & 2-Hop Neo4j Citation Graph</span>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="actions-bar">
+                <button type="button" class="btn-clear" id="btn-clear">CLEAR</button>
+                <button type="button" class="btn-analyze" id="btn-analyze">
+                    <span class="btn-icon">⚡</span>
+                    <span class="btn-text">ANALYZE JURISPRUDENCE</span>
+                    <span class="spinner" id="analyze-spinner"></span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Loading State Indicator -->
+        <div class="loading-panel" id="loading-panel" style="display: none;">
+            <div class="loading-spinner-large"></div>
+            <h3 class="loading-title">Traversing Texas Citation Graph...</h3>
+            <p class="loading-sub" id="loading-step-text">Generating query vector with text-embedding-004...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-wrapper" style="display: none;">
+            
+            <!-- Tier / Method Banner -->
+            <div class="method-banner">
+                <div class="method-left">
+                    <span class="tier-indicator" id="tier-indicator">Gold Standard</span>
+                    <span class="method-description" id="tier-description">Retrieved via citation network traversal matching target strategy</span>
+                </div>
+                <div class="method-right">
+                    <span class="count-pill" id="results-count-pill">5 Precedents Located</span>
+                </div>
+            </div>
+
+            <!-- Strategic Memo Card -->
+            <section class="memo-card">
+                <div class="memo-header">
+                    <div class="memo-title-group">
+                        <span class="memo-badge">AI FRONTIERS &bull; GEMINI 3.7</span>
+                        <h2 class="memo-title">Strategic Legal Memorandum</h2>
+                    </div>
+                    <div class="memo-actions">
+                        <button class="memo-btn" id="btn-copy-memo" title="Copy text to clipboard">
+                            <span class="btn-icon">📋</span> Copy Memo
+                        </button>
+                        <button class="memo-btn" id="btn-print-memo" title="Print or save as PDF">
+                            <span class="btn-icon">🖨️</span> Print / Export
+                        </button>
+                    </div>
+                </div>
+                <div class="memo-content markdown-body" id="memo-content">
+                    <!-- Markdown injected here -->
+                </div>
+            </section>
+
+            <!-- Split Section: Citation Graph & Precedents List -->
+            <div class="split-grid">
+                
+                <!-- Left: Citation Map Panel -->
+                <section class="graph-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Citation Network Map</h3>
+                        <div class="graph-controls">
+                            <button class="graph-ctrl-btn" id="btn-fit-graph" title="Fit to screen">Fit</button>
+                            <button class="graph-ctrl-btn" id="btn-toggle-physics" title="Toggle stabilization">Physics</button>
+                        </div>
+                    </div>
+                    
+                    <div class="graph-legend">
+                        <span class="legend-item"><span class="legend-dot" style="background:#C67B5C;"></span> Current Case</span>
+                        <span class="legend-item"><span class="legend-dot" style="background:#7A9B76;"></span> Favorable</span>
+                        <span class="legend-item"><span class="legend-dot" style="background:#8B7D6B;"></span> Adverse</span>
+                        <span class="legend-item"><span class="legend-dot" style="background:#A8A29E;"></span> Anchor Cases</span>
+                    </div>
+
+                    <div id="citation-network" class="network-canvas"></div>
+                    <div class="network-hint">Click any node to highlight precedent details</div>
+                </section>
+
+                <!-- Right: Precedents Cards Panel -->
+                <section class="precedents-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Authoritative Precedents</h3>
+                        <span class="panel-sub" id="precedents-counter">Showing 5 Cases</span>
+                    </div>
+
+                    <div class="precedents-list" id="precedents-list">
+                        <!-- Precedent cards injected here -->
+                    </div>
+                </section>
+
+            </div>
+
+        </div>
+
+        <!-- Empty / Zero State -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-icon">📭</div>
+            <h3 class="empty-title">No Relevant Precedents Found</h3>
+            <p class="empty-desc">Even after expanding the search from citation paths to semantic vector similarity, no matching cases were returned.<br><em>Tip: Try providing more factual context or specific legal terminology.</em></p>
+        </div>
+
+    </main>
+
+    <!-- Full Opinion Modal -->
+    <div class="modal-backdrop" id="opinion-modal" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-tag">TEXAS COURT OF CRIMINAL APPEALS</span>
+                    <h3 class="modal-title" id="modal-case-title">Case Title</h3>
+                    <div class="modal-meta" id="modal-case-meta">Offense: Burglary &bull; Decision: Reversed and remanded</div>
+                </div>
+                <button class="modal-close" id="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="opinion-text" id="modal-case-text">
+                    <!-- Full opinion text here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-copy" id="btn-modal-copy">Copy Opinion Text</button>
+                <button class="btn-modal-close" id="btn-modal-close-bottom">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toast" style="display: none;">
+        <span id="toast-message">Notification</span>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>

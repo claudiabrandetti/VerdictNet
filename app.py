@@ -44,7 +44,7 @@ NEO4J_USER = "neo4j"
 
 genai.configure(api_key=API_KEY)
 EMBEDDING_MODEL = 'text-embedding-004'
-LLM_MODEL = 'gemini-2.0-flash'
+LLM_MODEL = 'gemini-3.7-flash'
 
 # ------------------------------------------------------
 # 3. BACKEND LOGIC

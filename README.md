@@ -3,14 +3,7 @@
 
 Project developed for the **AI Frontiers: LLM** course.
 
-## Authors
-* **Claudia Brandetti**
-* **Denise Di Franza**
-* **Anastasia Farinaro**
-* **Daniele Sarcina**
-
-## Link to the presentation
-https://aifrontiersgroup6.my.canva.site/llm
+## Author: **Claudia Brandetti**
 
 > **Bridging the Semantic Gap in Legal Research with Hybrid Graph Retrieval-Augmented Generation.**
 
@@ -26,7 +19,7 @@ An intelligent legal assistant that combines semantic search with legal citation
 
 **Stare Decisis AI** is an intelligent legal assistant designed to navigate the complexity of the US Common Law system. Unlike traditional keyword-based search engines, which fail to capture legal nuance, this project utilizes a **Graph RAG (Retrieval-Augmented Generation)** architecture.
 
-By transforming **7791 raw legal documents** (Texas Criminal Reports) into a Knowledge Graph, the system can identify relevant precedents based on **semantic similarity** via `text-embedding-004` and **legal authority** (Citation Network Analysis), generating strategic defense memos in real-time.
+By transforming **raw legal documents** (Texas Criminal Reports) into a Knowledge Graph, the system can identify relevant precedents based on **semantic similarity** via `text-embedding-004` and **legal authority** (Citation Network Analysis), generating strategic defense memos in real-time.
 
 ----
 
@@ -123,8 +116,8 @@ We implemented a multi-model architecture to leverage the best strengths of each
 Clone the repository:
 
 ```bash
-git clone https://github.com/denise-df/Gavel-Graph.git
-cd Gavel-Graph
+git clone https://github.com/claudiabrandetti/VerdictNet.git
+cd VerdictNet
 ```
 
 Install dependencies:
@@ -189,7 +182,7 @@ To demonstrate the power of **Graph RAG**, we tested a complex query:
 
 ## Evaluation & Results
 
-We conducted an ablation study comparing **Vector-Only Search** vs. **Graph RAG**.
+I've conducted an ablation study comparing **Vector-Only Search** vs. **Graph RAG**.
 
 * **Vector Search:** Efficient at finding textually similar descriptions but often retrieves legally irrelevant cases (e.g., finding *Burglary* cases with "sleeping victims" instead of "sleeping defendants").
 * **Graph RAG:** Significantly improves relevance by retrieving the *authoritative cases* cited by the vector matches, successfully identifying procedural defenses (e.g., *McLemore v. State*) that standard search misses.

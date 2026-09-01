@@ -59,10 +59,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     dot.classList.remove("offline");
                     dot.classList.add("online");
                     dbStatusText.textContent = "Neo4j Connected";
+                } else if (data.demo_dataset_loaded) {
+                    dot.classList.remove("offline");
+                    dot.classList.add("online");
+                    dbStatusText.textContent = `Graph Engine (${data.demo_dataset_loaded} Cases)`;
                 } else {
                     dot.classList.remove("online");
                     dot.classList.add("offline");
-                    dbStatusText.textContent = "Neo4j Offline / Demo";
+                    dbStatusText.textContent = "Offline";
                 }
             }
         } catch (e) {

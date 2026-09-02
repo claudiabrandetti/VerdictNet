@@ -1,4 +1,4 @@
-# Gavel&Graph - AI Frontiers: LLM - Group 9
+# VerdictNet
 ## Stare Decisis AI: Graph RAG for Texas Criminal Law
 
 Project developed for the **AI Frontiers: LLM** course.

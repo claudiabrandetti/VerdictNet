@@ -1,0 +1,27 @@
+# Secrets locali (fallback usato da load_credentials() in api/index.py)
+key.txt
+neo4j_pass.txt
+.env
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Vercel
+.vercel/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Log
+*.log

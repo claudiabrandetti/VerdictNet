@@ -11,7 +11,7 @@ services:
       - "7474:7474" # HTTP Browser
       - "7687:7687" # Bolt protocol
     environment:
-      - NEO4J_AUTH=neo4j/verdictnet_password
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
       - NEO4J_PLUGINS=["apoc"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
       - NEO4J_dbms_security_procedures_allow__csv=true
@@ -19,7 +19,7 @@ services:
       - neo4j_data:/data
       - ./data/seed_graph.cypher:/var/lib/neo4j/import/seed_graph.cypher:ro
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p verdictnet_password 'RETURN 1' || exit 1"]
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p ${NEO4J_PASSWORD} 'RETURN 1' || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -35,10 +35,12 @@ services:
         condition: service_healthy
     volumes:
       - ./data/seed_graph.cypher:/seed_graph.cypher:ro
+    environment:
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
     command: >
       bash -c "
         echo '🚀 Seeding Neo4j with Texas Caselaw Graph and Vector Embeddings...';
-        cypher-shell -a bolt://neo4j:7687 -u neo4j -p verdictnet_password -f /seed_graph.cypher;
+        cypher-shell -a bolt://neo4j:7687 -u neo4j -p ${NEO4J_PASSWORD} -f /seed_graph.cypher;
         echo '✅ Seed completed successfully!';
       "
     restart: "no"
@@ -57,7 +59,7 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USER=neo4j
-      - NEO4J_PASSWORD=verdictnet_password
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
     depends_on:
       neo4j:
         condition: service_healthy

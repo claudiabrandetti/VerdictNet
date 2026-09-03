@@ -1,42 +1,35 @@
 import os
+import sys
 import random
 import time
-import google.generativeai as genai
 from neo4j import GraphDatabase
 from tqdm import tqdm
 import numpy as np
 
-# --- CONFIGURAZIONE ---
-NEO4J_URI = "bolt://localhost:7687"
-NEO4J_USER = "neo4j"
-NEO4J_VECTOR_INDEX = "case-text-embeddings" 
+# Ensure UTF-8 output on Windows consoles
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
-# Caricamento chiavi
-try:
-    with open("neo4j_pass.txt", "r") as f: PWD = f.read().strip()
-    with open("key.txt", "r") as f: API_KEY = f.read().strip()
-except:
-    print("Errore: file credenziali mancanti.")
-    exit()
+# Import unified credentials and embedding logic from api.index
+from api.index import load_credentials, get_embedding
 
-genai.configure(api_key=API_KEY)
-EMBEDDING_MODEL = 'text-embedding-004'
+NEO4J_URI, NEO4J_USER, PWD, API_KEY = load_credentials()
+NEO4J_VECTOR_INDEX = os.getenv("NEO4J_VECTOR_INDEX", "case-text-embeddings")
+
+if not PWD or not API_KEY:
+    print("Errore: credenziali mancanti (NEO4J_PASSWORD o GEMINI_API_KEY/GOOGLE_API_KEY).")
+    exit(1)
+
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, PWD))
 
-def get_embedding(text):
-    try:
-        return genai.embed_content(
-            model=EMBEDDING_MODEL,
-            content=text[:9000],
-            task_type="RETRIEVAL_QUERY"
-        )['embedding']
-    except: return None
-
-def get_test_set(sample_size=100):
+def get_test_set(sample_size=40):
     """
-    Recupera SOLO i casi che citano "Precedenti Autorevoli" (Authority Cases).
+    Recupera i casi che citano "Precedenti Autorevoli" (Authority Cases).
+    Nel dataset benchmark curato da 50 casi, la condizione di in-degree >= 2 individua
+    44 casi candidati (88% del corpus), offrendo una base statisticamente solida
+    e selettiva senza dover allentare la soglia a >= 1.
     """
-    print("--- Generazione Dataset ---")
+    print("--- Generazione Dataset di Test ---")
     
     # Query pulita senza commenti // per evitare errori di parsing
     query = """
@@ -130,7 +123,7 @@ def calculate_score(ground_truth_list, retrieved_list):
     return max_points
 
 def main():
-    test_cases = get_test_set(150) # Testiamo su 150 casi
+    test_cases = get_test_set(40) # Testiamo su 40 casi rappresentativi
     print(f"Test Set: {len(test_cases)} casi pronti.\n")
     
     vector_scores = []

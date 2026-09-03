@@ -21,6 +21,12 @@ An intelligent legal assistant that combines semantic search with legal citation
 
 By transforming **raw legal documents** (Texas Criminal Reports) into a Knowledge Graph, the system can identify relevant precedents based on **semantic similarity** via `text-embedding-004` and **legal authority** (Citation Network Analysis), generating strategic defense memos in real-time.
 
+> [!NOTE]
+> **Pipeline Capacity vs. Live Demonstration Dataset:**  
+> The end-to-end data pipeline (`A` through `E`) is designed to scale across the complete historical corpus of **27,000+ opinions** (Volumes 1–142 of Texas Criminal Reports from *Case.law*).  
+> For instant, responsive demonstrations (both locally via Docker and deployed serverless on Vercel), this repository includes a curated, high-fidelity benchmark subset of **50 fully parsed, vectorized, and citation-linked cases**. This includes ***McLemore v. State*** and its citation network, ensuring live verifiable graph traversal and strategic defense filtering without requiring hours of batch LLM extraction or large database hosting costs.
+
+
 ----
 
 ## Key Features

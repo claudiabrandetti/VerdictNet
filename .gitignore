@@ -25,3 +25,9 @@ venv/
 
 # Log
 *.log
+
+# Pipeline outputs & temporary crawl files
+Test/
+case_details_tx_CLEANED.json
+convictions_with_llm.json
+case_details_tx_with_llm.json

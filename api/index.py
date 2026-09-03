@@ -39,8 +39,8 @@ app.add_middleware(
 # 1. CONFIGURATION & KEYS
 # ------------------------------------------------------
 NEO4J_VECTOR_INDEX = os.getenv("NEO4J_VECTOR_INDEX", "case-text-embeddings")
-EMBEDDING_MODEL = "text-embedding-004"
-LLM_MODEL = "gemini-3.7-flash"
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "models/gemini-embedding-001")
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-3.7-flash")
 
 def load_credentials():
     pwd = os.getenv("NEO4J_PASSWORD")
@@ -105,15 +105,21 @@ def get_driver():
 # ------------------------------------------------------
 def get_embedding(text: str) -> Optional[List[float]]:
     if API_KEY:
-        try:
-            result = genai.embed_content(
-                model=EMBEDDING_MODEL,
-                content=text[:9000],
-                task_type="RETRIEVAL_QUERY"
-            )
-            return result.get('embedding')
-        except Exception as e:
-            print(f"Embedding API error: {e}")
+        for candidate in [EMBEDDING_MODEL, "models/gemini-embedding-001", "text-embedding-004"]:
+            try:
+                kwargs = {
+                    "model": candidate,
+                    "content": text[:9000],
+                    "task_type": "RETRIEVAL_QUERY"
+                }
+                if "embedding-001" in candidate:
+                    kwargs["output_dimensionality"] = 768
+                result = genai.embed_content(**kwargs)
+                emb = result.get('embedding')
+                if emb:
+                    return emb
+            except Exception:
+                continue
 
     # Deterministic fallback vector (768 dimensions)
     np.random.seed(int(hashlib.md5(text.encode("utf-8")).hexdigest()[:8], 16))

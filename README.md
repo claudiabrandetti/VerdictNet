@@ -22,9 +22,9 @@ An intelligent legal assistant that combines semantic search with legal citation
 By transforming **raw legal documents** (Texas Criminal Reports) into a Knowledge Graph, the system can identify relevant precedents based on **semantic similarity** via `text-embedding-004` and **legal authority** (Citation Network Analysis), generating strategic defense memos in real-time.
 
 > [!NOTE]
-> **Pipeline Capacity vs. Live Demonstration Dataset:**  
-> The end-to-end data pipeline (`A` through `E`) is designed to scale across the complete historical corpus of **27,000+ opinions** (Volumes 1–142 of Texas Criminal Reports from *Case.law*).  
-> For instant, responsive demonstrations (both locally via Docker and deployed serverless on Vercel), this repository includes a curated, high-fidelity benchmark subset of **50 fully parsed, vectorized, and citation-linked cases**. This includes ***McLemore v. State*** and its citation network, ensuring live verifiable graph traversal and strategic defense filtering without requiring hours of batch LLM extraction or large database hosting costs.
+> **Curated Demo Scope vs. Full Corpus Scalability:**  
+> The repository deliberately and intentionally operates on a curated benchmark of **50 fully parsed, vectorized, and citation-linked cases** (including ***McLemore v. State*** and its citation network), with no active plans for massive crawling or public cloud hosting. This ensures instant zero-latency evaluation, verifiable citation traversal, and zero cloud hosting costs.  
+> The underlying extraction and indexing pipeline (`A` through `E`), however, is architected to scale across the complete historical corpus of **27,000+ opinions** (Volumes 1–142 of Texas Criminal Reports from *Case.law*). See [Scaling Beyond the Demo Dataset](#scaling-beyond-the-demo-dataset) for the architectural blueprint.
 
 
 ----
@@ -93,14 +93,12 @@ We implemented a multi-model architecture to leverage the best strengths of each
 │   ├── index.html                   # Main User Interface
 │   ├── style.css                    # Luxury Legal Editorial Styling
 │   └── app.js                       # Vis.js Citation Network & API Controller
-├── data_pipeline/
-│   ├── A-case-law-crawler.ipynb     # Downloads raw cases
-│   ├── B-extract_tables_from_json.ipynb # Converts JSON to tabular data
-│   ├── C-LLM_extraction_caselaw.ipynb   # Extracts metadata via Gemini 3.7
-│   ├── D-data_merger.ipynb          # Merges data
-│   └── E-create_embedding.ipynb     # Generates Vectors (text-embedding-004)
+├── A-case-law-crawler.ipynb         # Downloads raw cases from Case.law
+├── B-extract_tables_from_json.ipynb # Converts JSON to tabular relational data
+├── C-LLM_extraction_caselaw.ipynb   # Extracts structured metadata via Gemini 3.7 Flash
+├── D-data_merger.ipynb              # Merges and normalizes graph nodes and edges
+├── E-create_embedding.ipynb         # Generates 768-dim vector embeddings
 ├── dev_server.py                    # Local Development Server (http://localhost:8000)
-├── app.py                           # Streamlit Legacy Reference App
 ├── benchmark.py                     # Graph RAG vs Vector Search Evaluation
 ├── vercel.json                      # Vercel Deployment Configuration
 ├── requirements.txt                 # Dependencies
@@ -207,7 +205,7 @@ To demonstrate the power of **Graph RAG**, we tested a complex query:
 
 ## Evaluation & Results
 
-An empirical ablation evaluation was executed via [`benchmark.py`](file:///c:/Users/claud/Desktop/VerdictNet/benchmark.py) comparing **Vector-Only Search** (baseline) against **Graph RAG** on the local Neo4j graph:
+An empirical ablation evaluation was executed via [`benchmark.py`](benchmark.py) comparing **Vector-Only Search** (baseline) against **Graph RAG** on the local Neo4j graph:
 
 - **Test Set**: 40 representative appellate cases sampled from 44 qualified candidate cases with an in-degree threshold of $\ge 2$ incoming citations (representing 88% of the 50-case benchmark corpus).
 - **Scoring Protocol**: Soft-match scoring assigning **1.0 point** for an exact target case ID match (ground-truth cited authority) and **0.5 points** for retrieving a legally analogous precedent sharing the same verified offense.
@@ -220,9 +218,30 @@ An empirical ablation evaluation was executed via [`benchmark.py`](file:///c:/Us
 
 -----
 
+## Scaling Beyond the Demo Dataset
+
+The project intentionally operates on a **curated benchmark of 50 verified cases**, with no active plans for massive crawling or public cloud database hosting at this time. This intentional design scope ensures that the demo is lightweight, 100% reproducible, fast to start up locally or on Vercel, and free from external database hosting costs.
+
+The architecture itself, however, has been engineered from the ground up for horizontal scale across US caselaw. If scaling up to hundreds, thousands, or the entire historical corpus is desired in the future, the expansion path is clear:
+
+1. **Re-running the Data Pipeline (`A` $\rightarrow$ `E`)**:
+   - To ingest additional volumes, simply execute the batch pipeline notebooks across a larger target set of volumes:
+     - [`A-case-law-crawler.ipynb`](A-case-law-crawler.ipynb): Downloads raw case JSONs from *Case.law* (up to all 142 volumes and 27,000+ opinions).
+     - [`B-extract_tables_from_json.ipynb`](B-extract_tables_from_json.ipynb): Parses opinion texts and maps inter-case citation networks into relational tables.
+     - [`C-LLM_extraction_caselaw.ipynb`](C-LLM_extraction_caselaw.ipynb): Performs batch structured extraction (`Offense`, `Punishment`, `Decision`, `Conviction`) using Gemini Flash.
+     - [`D-data_merger.ipynb`](D-data_merger.ipynb): Normalizes tables into graph nodes (`:CASE`, `:TEXT`) and edges (`:CITES`, `:HAS_TEXT`).
+     - [`E-create_embedding.ipynb`](E-create_embedding.ipynb): Computes 768-dimensional embeddings and populates the graph database.
+2. **Local Development vs. Production Architecture**:
+   - **Docker / Docker Compose** is designed **strictly for local development and offline testing** (running an isolated Neo4j container on your workstation). It is *not* the mechanism through which external users would interact with a scaled dataset.
+   - For a **public production deployment with a large dataset**, the fully processed graph would be loaded **once** into a managed, cloud-hosted, high-availability graph instance (such as **Neo4j AuraDB Enterprise**).
+   - The deployed FastAPI web application (e.g. hosted serverless on **Vercel** or containerized on AWS/GCP) simply points its environment variables (`NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`) to the cloud database.
+   - **Zero End-User Data Overhead**: End users and querying clients never need to crawl, extract, or download data locally. All retrieval (vector search + graph traversal) executes centrally in milliseconds on the cloud graph database.
+
+-----
+
 ## Known Limitations
 
-* **Demonstration Dataset Scale:** The live web demonstration and default Docker container operate on a curated benchmark subset of 50 fully parsed and vectorized cases rather than the complete 27,000+ opinions of Texas Criminal Reports. While ideal for instantaneous testing without multi-gigabyte storage or hours of batch LLM extraction, full enterprise use requires ingesting the full historical corpus.
+* **Curated Benchmark Scope (50 Cases):** The project deliberately runs on a curated benchmark subset of 50 cases rather than the complete 27,000+ opinions of Texas Criminal Reports. This scope is an intentional design choice to make local testing instantaneous and free of hosting costs.
 * **Public Endpoint Access:** The `/api/analyze` and `/api/feedback` endpoints do not currently enforce authentication, API key validation, or per-IP rate limiting; in a public deployment, any external client can submit inference requests.
 * **Single-Region Serverless Deployment:** The hosted backend on Vercel runs in a single serverless region without multi-region failover or cross-continental latency optimization.
 * **External LLM Quota & Latency:** Metadata extraction during batch ingestion and final legal memo generation depend on Google Gemini 3.7 Flash; processing high volumes of unstructured opinions is constrained by external API rate limits, daily quotas, and network round-trip latencies.
